@@ -1,3 +1,5 @@
+import java.util.Stack;
+
 /**
  * Created by YX on 2016/11/2.
  */
@@ -6,52 +8,64 @@
         s = "3[a2[c]]", return "accaccacc".
         s = "2[abc]3[cd]ef", return "abcabccdcdcdef".
 */
-    //TODO
-    //a difficult question
+//a difficult question
 public class leetcode394 {
+
     public String decodeString(String s) {
         if(s==null){
             return null;
         }
         if(s.length()==0)
             return "";
+        StringBuilder res = new StringBuilder();
+
+        Stack<String> stack = new Stack<>();
+        Stack<Integer> numberStack = new Stack<>();
         StringBuilder sb = new StringBuilder();
-        char[] chs = s.toCharArray();
-        char[] code= new char[chs.length-3];
-        char ch;
-        int k=0,m=0;
-        boolean flag = true;
-        for(int i=0;i<chs.length;i++){
-            ch=chs[i];
-            if(ch=='['){
-                k/=10;
-                flag=false;
-                continue;
-            }
-            if(ch==']'){
-                for(int ii=0;ii<k;ii++){
-                    for(int jj=0;jj<m;jj++){
-                        sb.append(code[jj]);
-                    }
+        int number = 0;
+
+        for(char ch: s.toCharArray()){
+            if(ch == '['){
+                numberStack.push(number);
+                number = 0;
+            }else if(ch == ']'){
+                String pre = stack.pop();
+                String abc = sb.toString();
+                int num = numberStack.pop();
+                StringBuilder combine = new StringBuilder();
+                if(abc.equals("")){
+                    abc = pre;
+                    pre = stack.pop();
                 }
-                k=0;
-                m=0;
-                flag=true;
-                continue;
-            }
-            if(flag){//k
-                k+=(ch-'0');
-                k*=10;
-            }
-            else{//code
-                code[m++]=ch;
+                combine.append(pre);
+                for (int i = 0; i < num; i++) {
+                    combine.append(abc);
+                }
+                sb.delete( 0, sb.length());
+                if(!stack.isEmpty()) {
+                    sb.append(combine.toString());
+                }else{
+                    res.append(combine.toString());
+                }
+            }else if(ch >= '0' && ch <= '9'){
+                if(number == 0){
+                    String tmp = sb.toString();
+                    stack.push(tmp);
+                    sb.delete( 0, sb.length());
+                }
+                number = number * 10 + (ch - '0');
+            }else{
+                sb.append(ch);
             }
         }
-        return sb.toString();
+        res.append(sb);
+        return res.toString();
     }
 
-    /*public static void main(String[] args) {
+    public static void main(String[] args) {
         leetcode394 test = new leetcode394();
-        System.out.println(test.decodeString(null));
-    }*/
+        String res = test.decodeString("rpo3[a]btjdls2[b3[po]c]tfr12[o3[d]]i");
+        System.out.println(res);
+        System.out.println(res.equals("rpoaaabtjdlsbpopopocbpopopoctfrodddodddodddodddodddodddodddodddodddodddodddodddi"));
+    }
 }
